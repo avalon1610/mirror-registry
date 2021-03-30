@@ -1,0 +1,21 @@
+nz-header {
+    background: white !important;
+}
+
+nz-layout {
+    background: #fff;
+}
+
+nz-content {
+    margin: 20px 40px;
+}
+
+#inner-content {
+    background: #fff;
+    padding: 24px;
+}
+
+button {
+    margin-right: 10px;
+    min-width: 100px;
+}

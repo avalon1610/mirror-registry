@@ -1,0 +1,82 @@
+<nz-layout>
+  <nz-header nz-row nzAlign="middle" nzJustify="space-between">
+    <div nz-col>
+      <ul nz-menu nzMode="horizontal">
+        <li nz-menu-item nzSelected>
+          <i nz-icon nzType="home" nzTheme="outline"></i>
+          <a routerLink="/home">Home</a>
+        </li>
+        <li nz-menu-item *ngIf="auth.user && auth.user.role != 'User'">
+          <i nz-icon nzType="setting"></i>
+          <a routerLink="/wizard">Config Wizard</a>
+        </li>
+      </ul>
+    </div>
+    <div nz-col>
+      <form nz-form nzLayout="inline">
+        <nz-form-item *ngIf="auth.user">
+          <nz-form-label nzNoColon=true nzTooltipTitle="token: {{ auth.user.token }}">
+            Hello, {{ auth.user.username }}
+          </nz-form-label>
+        </nz-form-item>
+        <nz-form-item>
+          <nz-form-control>
+            <button *ngIf="!auth.user" nz-button nzType="primary" (click)="login()">Log In</button>
+            <button *ngIf="auth.user" nz-button nzType="primary" (click)="logout()">Log Out</button>
+            <button *ngIf="!auth.user && config.current.registry.ldap != null" nz-button nzType="primary"
+              (click)="ldap_login()">LDAP Log In</button>
+            <button *ngIf="!auth.user && config.current.registry.can_create_account" nz-button
+              (click)="showModal(false)">Create New Account</button>
+            <button *ngIf="auth.user && auth.user.type == 'Internal'" nz-button (click)="showModal(true)">
+              Change Password
+            </button>
+          </nz-form-control>
+        </nz-form-item>
+      </form>
+    </div>
+  </nz-header>
+  <nz-content>
+    <div id="inner-content">
+      <router-outlet></router-outlet>
+    </div>
+  </nz-content>
+</nz-layout>
+<nz-modal [(nzVisible)]="isVisible" nzTitle="Create New Account" (nzOnCancel)="handleCancel()" (nzOnOk)="handleOk()"
+  [nzOkLoading]="isOkLoading">
+  <form *nzModalContent nz-form [formGroup]="createForm">
+    <nz-form-item>
+      <nz-form-label nzSm="7" nzXs="24" nzRequired nzFor="username">Username</nz-form-label>
+      <nz-form-control nzSm="14" nzXs="24" nzErrorTip="Please input your username">
+        <input nz-input formControlName="username" id="username"
+          [readonly]="isUpdateModal && auth.user.role != 'Root'" />
+      </nz-form-control>
+    </nz-form-item>
+    <nz-form-item>
+      <nz-form-label nzSm="7" nzXs="24" nzRequired nzFor="password">Password</nz-form-label>
+      <nz-form-control nzSm="14" nzXs="24" nzErrorTip="Please input your password">
+        <input type="password" id="password" nz-input formControlName="password"
+          (ngModelChange)="updateConfirmValidator()" />
+      </nz-form-control>
+    </nz-form-item>
+    <nz-form-item>
+      <nz-form-label nzSm="7" nzXs="24" nzRequired nzFor="checkPassword">Confirm Password</nz-form-label>
+      <nz-form-control nzSm="14" nzXs="24" [nzErrorTip]="errorTpl">
+        <input type="password" nz-input formControlName="checkPassword" id="checkPassword" />
+        <ng-template #errorTpl let-control>
+          <ng-container *ngIf="control.hasError('required')">
+            Please confirm your password
+          </ng-container>
+          <ng-container *ngIf="control.hasError('confirm')">
+            Two passwords that you enter is inconsistent
+          </ng-container>
+        </ng-template>
+      </nz-form-control>
+    </nz-form-item>
+    <nz-form-item>
+      <nz-form-label nzSm="7" nzXs="24" nzFor="email">E-mail</nz-form-label>
+      <nz-form-control nzSm="14" nzXs="24" nzErrorTip="The input is not valid email">
+        <input nz-input formControlName="email" id="email" />
+      </nz-form-control>
+    </nz-form-item>
+  </form>
+</nz-modal>

@@ -1,0 +1,190 @@
+<nz-spin nzSize="large" [nzSpinning]="config.current.busy">
+    <div nz-row>
+        <div nz-col nzSpan="1"></div>
+        <nz-steps nz-col nzSpan="5" [nzCurrent]="current_step" nzDirection="vertical"
+            (nzIndexChange)="onIndexChange($event)">
+            <nz-step nzTitle="Git Index" nzDescription="repo storage configs"></nz-step>
+            <nz-step nzTitle="Database" nzDescription="where to found db"></nz-step>
+            <nz-step nzTitle="Crates" nzDescription="crates storage configs"></nz-step>
+            <nz-step nzTitle="Registry" nzDescription="registry common config"></nz-step>
+        </nz-steps>
+        <div nz-col nzSpan="17">
+            <div class="steps-content">
+                <ng-container [ngTemplateOutlet]="changeContent"> </ng-container>
+            </div>
+            <div class="steps-action" nz-row nzJustify="center">
+                <button nz-col nz-button nzType="default" (click)="pre()"
+                    [disabled]="current_step == 0">Previous</button>
+                <button nz-col nz-button nzType="default" (click)="next()" *ngIf="current_step < 3">Next</button>
+                <button nz-col nz-button nzType="primary" (click)="init()"
+                    *ngIf="current_step === 3 && config.current.inited == false" nz-tooltip
+                    nzTooltipTitle="Depending on your internet speed to the upstream, this may take several minutes">Initialize</button>
+                <button nz-col nz-button nzType="primary" (click)="save()"
+                    *ngIf="current_step === 3 && config.current.inited == true">Save</button>
+            </div>
+        </div>
+        <div nz-col nzSpan="1"></div>
+    </div>
+</nz-spin>
+<ng-template #step1>
+    <form nz-form>
+        <nz-form-item>
+            <nz-form-label nzSpan="6" nzFor="index_path">Index repo</nz-form-label>
+            <nz-form-control nzSpan="12">
+                <nz-input-group>
+                    <input nz-input name="index_path" nz-tooltip
+                        nzTooltipTitle="bare remote repo path, stored mirror crates-io index info"
+                        nzTooltipPlacement="right" [(ngModel)]="config.current.git.index_path" />
+                </nz-input-group>
+            </nz-form-control>
+        </nz-form-item>
+        <nz-form-item>
+            <nz-form-label nzSpan="6" nzFor="working_path">Sync repo</nz-form-label>
+            <nz-form-control nzSpan="12">
+                <nz-input-group>
+                    <input nz-input name="working_path" nz-tooltip
+                        nzTooltipTitle="work tree repo path, for sync upstream index and local private crate info"
+                        nzTooltipPlacement="right" [(ngModel)]="config.current.git.working_path" />
+                </nz-input-group>
+            </nz-form-control>
+        </nz-form-item>
+        <nz-form-item>
+            <nz-form-label nzSpan="6" nzFor="upstream_url">Index upstream</nz-form-label>
+            <nz-form-control nzSpan="12">
+                <nz-input-group>
+                    <input nz-input name="upstream_url" nz-tooltip nzTooltipTitle="index info upstream url for mirror and sync, 
+                            default is offical github url [https://github.com/rust-lang/crates.io-index],
+                            need restart to take effect" nzTooltipPlacement="right"
+                        [(ngModel)]="config.current.git.upstream_url" />
+                </nz-input-group>
+            </nz-form-control>
+            <nz-tag nzColor="warning" *ngIf="config.current.inited">
+                <i nz-icon nzType="exclamation-circle"></i>
+                <span>need restart</span>
+            </nz-tag>
+        </nz-form-item>
+    </form>
+</ng-template>
+<ng-template #step2>
+    <form nz-form>
+        <nz-form-item>
+            <nz-form-label nzSpan="6" nzFor="url">Databsae url</nz-form-label>
+            <nz-form-control nzSpan="12">
+                <nz-input-group>
+                    <input nz-input name="url" nz-tooltip
+                        nzTooltipTitle="database url, only support sqlite3 file path for now" nzTooltipPlacement="right"
+                        [(ngModel)]="config.current.database.url" />
+                </nz-input-group>
+            </nz-form-control>
+        </nz-form-item>
+    </form>
+</ng-template>
+<ng-template #step3>
+    <form nz-form>
+        <nz-form-item>
+            <nz-form-label nzSpan="6" nzFor="storage_path">Crates storage</nz-form-label>
+            <nz-form-control nzSpan="12">
+                <nz-input-group>
+                    <input nz-input name="storage_path" nz-tooltip nzTooltipTitle="path to store all the crates"
+                        nzTooltipPlacement="right" [(ngModel)]="config.current.crates.storage_path" />
+                </nz-input-group>
+            </nz-form-control>
+        </nz-form-item>
+        <nz-form-item>
+            <nz-form-label nzSpan="6" nzFor="upstream_url">Crates upstream</nz-form-label>
+            <nz-form-control nzSpan="12">
+                <nz-input-group>
+                    <input nz-input name="upstream_url" nz-tooltip
+                        nzTooltipTitle="crates upstream url for cache and download, default is offical crates-io url [https://crates.io]"
+                        nzTooltipPlacement="right" [(ngModel)]="config.current.crates.upstream_url" />
+                </nz-input-group>
+            </nz-form-control>
+        </nz-form-item>
+    </form>
+</ng-template>
+<ng-template #step4>
+    <form nz-form>
+        <nz-form-item>
+            <nz-form-label nzSpan="6" nzFor="address">Address</nz-form-label>
+            <nz-form-control nzSpan="12">
+                <nz-input-group>
+                    <input nz-input name="address" nz-tooltip
+                        nzTooltipTitle="mirror registry access url, need restart to take effect"
+                        nzTooltipPlacement="right" [(ngModel)]="config.current.registry.address" />
+                </nz-input-group>
+            </nz-form-control>
+            <nz-tag nzColor="warning" *ngIf="config.current.inited">
+                <i nz-icon nzType="exclamation-circle"></i>
+                <span>need restart</span>
+            </nz-tag>
+        </nz-form-item>
+        <nz-form-item>
+            <nz-form-label nzSpan="6" nzFor="sync_time">Sync interval</nz-form-label>
+            <nz-form-control nzSpan="12">
+                <nz-input-group>
+                    <input nz-input name="sync_time" nz-tooltip
+                        nzTooltipTitle="index sync interval, format can be 3m(3 minutes), 1h(1 hour), 2d(2 days)"
+                        nzTooltipPlacement="right" [(ngModel)]="config.current.registry.interval" />
+                </nz-input-group>
+            </nz-form-control>
+        </nz-form-item>
+        <nz-form-item>
+            <nz-form-label nzSpan="6" nzFor="can_create_account">Can Create Account</nz-form-label>
+            <nz-form-control nzSpan="12">
+                <nz-switch [(ngModel)]="config.current.registry.can_create_account" name="can_create_account"
+                    nzTooltipTitle="if turn off this, no more new account can be created, you should use LDAP instead"
+                    nzTooltipPlacement="right">
+                </nz-switch>
+            </nz-form-control>
+        </nz-form-item>
+        <nz-form-item>
+            <nz-form-label nzSpan="6" nzFor="enable_ldap">Enable LDAP</nz-form-label>
+            <nz-form-control nzSpan="12">
+                <nz-switch [(ngModel)]="enable_ldap" name="enable_ldap" (ngModelChange)="toggleLdap()"> </nz-switch>
+            </nz-form-control>
+        </nz-form-item>
+        <div class="ldap-content" *ngIf="enable_ldap">
+            <nz-form-item>
+                <nz-form-label nzSpan="6" nzFor="hostname">Host</nz-form-label>
+                <nz-form-control nzSpan="12">
+                    <nz-input-group>
+                        <input nz-input name="hostname" [(ngModel)]="config.current.registry.ldap.hostname" />
+                    </nz-input-group>
+                </nz-form-control>
+            </nz-form-item>
+            <nz-form-item>
+                <nz-form-label nzSpan="6" nzFor="base_dn">Base DN</nz-form-label>
+                <nz-form-control nzSpan="12">
+                    <nz-input-group>
+                        <input nz-input name="base_dn" [(ngModel)]="config.current.registry.ldap.base_dn" />
+                    </nz-input-group>
+                </nz-form-control>
+            </nz-form-item>
+            <nz-form-item>
+                <nz-form-label nzSpan="6" nzFor="domain">Domain</nz-form-label>
+                <nz-form-control nzSpan="12">
+                    <nz-input-group>
+                        <input nz-input name="domain" [(ngModel)]="config.current.registry.ldap.domain" />
+                    </nz-input-group>
+                </nz-form-control>
+            </nz-form-item>
+            <nz-form-item>
+                <nz-form-label nzSpan="6" nzFor="username">Username</nz-form-label>
+                <nz-form-control nzSpan="12">
+                    <nz-input-group>
+                        <input nz-input name="username" [(ngModel)]="config.current.registry.ldap.username" />
+                    </nz-input-group>
+                </nz-form-control>
+            </nz-form-item>
+            <nz-form-item>
+                <nz-form-label nzSpan="6" nzFor="password">Password</nz-form-label>
+                <nz-form-control nzSpan="12">
+                    <nz-input-group>
+                        <input nz-input type="password" name="password"
+                            [(ngModel)]="config.current.registry.ldap.password" />
+                    </nz-input-group>
+                </nz-form-control>
+            </nz-form-item>
+        </div>
+    </form>
+</ng-template>

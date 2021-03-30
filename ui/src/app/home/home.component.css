@@ -1,0 +1,18 @@
+.cargo-guide-content {
+    border: 1px dashed #e9e9e9;
+    border-radius: 6px;
+    background-color: #fafafa;
+    margin: 20px 40px;
+    white-space: pre;
+}
+
+.admin-alert {
+    border: 1px dashed #e9e9e9;
+    border-radius: 6px;
+    background-color: #fafafa;
+    margin: 0px 40px;
+}
+
+.init-alert {
+    margin: 0px 40px;
+}

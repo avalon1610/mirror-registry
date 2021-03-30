@@ -1,0 +1,9 @@
+<div class="admin-alert">
+    <nz-alert nzMessage="You need to login the admin account to manager the system"
+        *ngIf="!auth.user || auth.user.role == 'User'"></nz-alert>
+</div>
+
+<h1 *ngIf="!config.current.inited" class="init-alert">The system has not been initialized</h1>
+<div class="cargo-guide-content" *ngIf="config.current.inited">
+    <nz-alert nzMessage="Set up your cargo" [nzDescription]="cargo_msg" nzShowIcon></nz-alert>
+</div>
